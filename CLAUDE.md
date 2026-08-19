@@ -27,6 +27,12 @@ recorded.
 | The SBE runtime is vendored, not a NuGet package | The package is abandoned. [F3](knowledge/findings/f3-sbe-dll-nuget-stale.md) |
 | Generated codecs are not committed | Regenerated per build; CI asserts freshness. |
 
+## The work queue
+
+Sequenced tasks are in [`IMPL/PLAN.md`](IMPL/PLAN.md); position in
+[`IMPL/CHECKPOINT.md`](IMPL/CHECKPOINT.md). To pick one up, read
+[the implementation loop](knowledge/practices/implementation-loop.md).
+
 ## Before you push
 
 ```bash

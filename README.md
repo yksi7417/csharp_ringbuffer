@@ -6,7 +6,7 @@ Production-shaped and teaching-grade at once: a producer claims a bounded span o
 slab, encodes an SBE message **directly into it** — no scratch buffer, no copy — and commits
 the true length. A consumer decodes in place from the same address.
 
-**Status: research complete, design decided, implementation not started.**
+**Status: research complete, design decided, [plan written](IMPL/PLAN.md), implementation not started.**
 
 ## Documentation
 
@@ -21,6 +21,7 @@ v0.2 so both people and agents can find context without reading the whole reposi
 | Why the build is set up strangely | [findings](knowledge/findings/index.md) |
 | How it is tested | [testing](knowledge/testing/index.md) |
 | How to do a specific task | [playbooks](knowledge/playbooks/index.md) |
+| What is being built next | [`IMPL/PLAN.md`](IMPL/PLAN.md) |
 
 ## The interesting problem
 

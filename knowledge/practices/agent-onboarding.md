@@ -23,6 +23,7 @@ your task needs and skip the rest.
 | Adding or changing a test | [the five test layers](/testing/test-pyramid.md), then the specific layer |
 | Adding a conformance fixture | [deterministic replay](/concepts/deterministic-replay.md), [conformance corpus](/architecture/conformance-corpus.md), [the playbook](/playbooks/add-conformance-case.md) |
 | Performance work | [zero copy](/concepts/zero-copy-in-dotnet.md), [false sharing](/concepts/false-sharing.md), [L5](/testing/l5-performance.md) |
+| Picking up the next piece of work | [the implementation loop](implementation-loop.md), [`IMPL/CHECKPOINT.md`](../../IMPL/CHECKPOINT.md) |
 | Writing docs or updating this bundle | [D9](/decisions/d9-okf-knowledge-bundle.md), [bundle maintenance](knowledge-bundle-maintenance.md) |
 
 # Rules that apply to every task

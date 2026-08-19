@@ -19,6 +19,7 @@ The guardrails that keep quality from eroding as the project grows. Most are ada
 # Process
 
 * [ADR discipline](adr-discipline.md) - One decision per file, numbered, superseded rather than deleted.
+* [The implementation loop](implementation-loop.md) - How to pick up a task from `IMPL/PLAN.md`, land it, and record it. Includes why the plan lives outside this bundle.
 * [Deferred-work register](deferred-work-register.md) - Every conscious deferral registered in the same change, enforced bidirectionally.
 * [Keeping this bundle current](knowledge-bundle-maintenance.md) - When a change obliges a documentation update, and why derived beats asserted.
 * [Teaching artifacts](teaching-artifacts.md) - What "teaching-grade" obliges beyond good tests.

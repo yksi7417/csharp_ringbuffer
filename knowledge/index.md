@@ -28,10 +28,15 @@ It says which concepts to load for which kind of task, and which to leave alone.
 
 # Project state
 
-**Phase: research complete, design decided, implementation not started.**
+**Phase: research complete, design decided, plan written, implementation not started.**
 
 The research is in [findings](findings/index.md) and the decisions it fed are in
 [decisions](decisions/index.md) — all ten are accepted. No production code exists yet.
+
+The sequenced work is at [`IMPL/PLAN.md`](../IMPL/PLAN.md) — 92 tasks across nine phases,
+with [`IMPL/CHECKPOINT.md`](../IMPL/CHECKPOINT.md) tracking position. To pick up a task, read
+[the implementation loop](practices/implementation-loop.md).
+
 The narrative research report that preceded this bundle is preserved in git history at
 `docs/RESEARCH.md`.
 
