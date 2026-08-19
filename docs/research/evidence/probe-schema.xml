@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe"
+                   package="Probe.Sbe" id="1" version="0" semanticVersion="5.2"
+                   description="probe" byteOrder="littleEndian">
+  <types>
+    <composite name="messageHeader">
+      <type name="blockLength" primitiveType="uint16"/>
+      <type name="templateId" primitiveType="uint16"/>
+      <type name="schemaId" primitiveType="uint16"/>
+      <type name="version" primitiveType="uint16"/>
+    </composite>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"/>
+      <type name="numInGroup" primitiveType="uint16"/>
+    </composite>
+    <composite name="varStringEncoding">
+      <type name="length" primitiveType="uint32" maxValue="1073741824"/>
+      <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+    </composite>
+    <type name="Symbol" primitiveType="char" length="8" characterEncoding="ASCII"/>
+    <composite name="Decimal64">
+      <type name="mantissa" primitiveType="int64"/>
+      <type name="exponent" primitiveType="int8"/>
+    </composite>
+    <enum name="MdEntryType" encodingType="char">
+      <validValue name="BID">0</validValue>
+      <validValue name="OFFER">1</validValue>
+      <validValue name="TRADE">2</validValue>
+    </enum>
+  </types>
+  <sbe:message name="MarketDataIncrementalRefresh" id="1" description="MDIncrementalRefresh">
+    <field name="transactTime" id="60" type="uint64"/>
+    <group name="mdEntries" id="268" dimensionType="groupSizeEncoding">
+      <field name="mdEntryType" id="269" type="MdEntryType"/>
+      <field name="symbol" id="55" type="Symbol"/>
+      <field name="mdEntryPx" id="270" type="Decimal64"/>
+      <field name="mdEntrySize" id="271" type="int64"/>
+      <group name="parties" id="453" dimensionType="groupSizeEncoding">
+        <field name="partyRole" id="452" type="uint8"/>
+      </group>
+      <data name="text" id="58" type="varStringEncoding"/>
+    </group>
+  </sbe:message>
+</sbe:messageSchema>
