@@ -120,3 +120,41 @@ build go red.
 gitignored, and git does not report ignored files — so a git-based check would pass
 *unconditionally*. That is worse than TRAP-2: not a check that misses a case, a check that can
 never fail. `scripts/ci/checks/codegen_fresh.sh` hashes the tree, regenerates, and compares.
+
+## TRAP-8 — "It passed locally" meant nothing, because local and CI ran different SDKs
+
+**What looked green:** `scripts/ci/gate.sh fast`, locally, immediately before a push that went
+red in CI. The pre-push hook ran the same script CI runs and passed.
+
+**Why it did not catch it:** the whole premise of
+[one gate command](../knowledge/practices/one-gate-command.md) — "if the gate is green, the
+fast lane in CI is green" — silently assumes **the same toolchain on both sides**. It was not.
+This container had .NET SDK 8.0.130; GitHub runners ship 10.0.302, where VSTest has been
+removed, so `dotnet test` fails there and passes here. Same script, same repo, opposite result.
+
+The gate was not wrong. Its guarantee was just narrower than its wording, and nothing said so.
+
+**Guard:** `global.json` pins the SDK, CI installs exactly that with `actions/setup-dotnet`
+using `global-json-file`, and `bootstrap.sh` now checks the SDK **major version** rather than
+mere presence — so a developer machine carrying only .NET 10 gets 8 installed instead of
+appearing ready.
+
+**The general shape:** any check whose result depends on ambient environment is only as
+trustworthy as the pinning behind it. A version that is not pinned is a variable, and a
+variable in a guardrail is a hole.
+
+## TRAP-9 — A third-party outage failed the build with no retry
+
+**What looked green:** nothing. This one failed honestly, which is why it is here as a
+near-miss rather than a defect.
+
+**What happened:** Maven Central answered HTTP 429 when both matrix legs fetched the SBE jar
+at the same second. The build failed for a reason that had nothing to do with the code.
+
+**Why it matters:** a red build that is not the code's fault is how a team learns to ignore
+red builds. Two or three of those and every failure becomes "probably just CI".
+
+**Guard:** the fetch retries five times with quadratic backoff and validates the archive
+before accepting it (a truncated download fails later, somewhere else, and much more
+confusingly). CI additionally caches the jar keyed on `sbe-version.txt`, so a green run does
+not depend on someone else's quota.

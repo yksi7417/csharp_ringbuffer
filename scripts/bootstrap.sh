@@ -17,8 +17,24 @@ log() { printf '\033[1mbootstrap:\033[0m %s\n' "$*"; }
 die() { printf '\033[31mbootstrap: %s\033[0m\n' "$*" >&2; exit 1; }
 
 # ── .NET SDK ────────────────────────────────────────────────────────────────
-if command -v dotnet >/dev/null 2>&1; then
-    log ".NET SDK present: $(dotnet --version)"
+# Presence is not enough: the SDK MAJOR VERSION must match global.json. GitHub
+# runners ship .NET 10, where VSTest has been removed, so a repo developed on 8
+# passes locally and fails in CI. See TRAP-8.
+REQUIRED_SDK_MAJOR=8
+
+have_required_sdk() {
+    command -v dotnet >/dev/null 2>&1 || return 1
+    dotnet --list-sdks 2>/dev/null | grep -q "^${REQUIRED_SDK_MAJOR}\."
+}
+
+if have_required_sdk; then
+    log ".NET SDK ${REQUIRED_SDK_MAJOR}.x present: $(dotnet --list-sdks | grep "^${REQUIRED_SDK_MAJOR}\." | tail -1 | cut -d' ' -f1)"
+elif command -v dotnet >/dev/null 2>&1; then
+    log "dotnet present ($(dotnet --version)) but no ${REQUIRED_SDK_MAJOR}.x SDK; installing one"
+    ${SUDO:-} apt-get update -qq
+    ${SUDO:-} apt-get install -y -qq "dotnet-sdk-${REQUIRED_SDK_MAJOR}.0" \
+        || die "could not install the .NET ${REQUIRED_SDK_MAJOR} SDK required by global.json"
+    export PATH="$PATH:/usr/lib/dotnet"
 else
     log "installing .NET SDK 8 via apt"
     # apt-get update is REQUIRED first. Without it the install fails with 404s on
@@ -50,9 +66,26 @@ mkdir -p "$(dirname "$SBE_JAR")"
 if [ -f "$SBE_JAR" ]; then
     log "SBE generator jar present: sbe-all-${SBE_VERSION}.jar"
 else
-    log "fetching sbe-all-${SBE_VERSION}.jar from Maven Central"
-    curl -fsSL -o "$SBE_JAR.tmp" "$MAVEN_BASE/${SBE_VERSION}/sbe-all-${SBE_VERSION}.jar" \
-        || die "could not fetch the SBE jar from Maven Central"
+    # Maven Central rate-limits (HTTP 429) when both matrix legs fetch at once.
+    # Retry with backoff rather than failing the build on someone else's quota.
+    fetched=0
+    for attempt in 1 2 3 4 5; do
+        log "fetching sbe-all-${SBE_VERSION}.jar from Maven Central (attempt ${attempt})"
+        if curl -fsSL --retry 3 --retry-connrefused --retry-delay 2 \
+                -o "$SBE_JAR.tmp" "$MAVEN_BASE/${SBE_VERSION}/sbe-all-${SBE_VERSION}.jar"; then
+            fetched=1
+            break
+        fi
+        rm -f "$SBE_JAR.tmp"
+        [ "$attempt" -lt 5 ] && sleep $((attempt * attempt * 2))
+    done
+    [ "$fetched" -eq 1 ] || die "could not fetch the SBE jar from Maven Central after 5 attempts"
+
+    # A truncated download is worse than none: it fails later, somewhere else.
+    if ! unzip -l "$SBE_JAR.tmp" >/dev/null 2>&1; then
+        rm -f "$SBE_JAR.tmp"
+        die "downloaded jar is not a valid archive"
+    fi
     mv "$SBE_JAR.tmp" "$SBE_JAR"
     log "fetched $(du -h "$SBE_JAR" | cut -f1)"
 fi

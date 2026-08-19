@@ -44,8 +44,24 @@ jobs:
           # need real git state, not a shallow detached snapshot.
           fetch-depth: 0
 
+      # Runners ship a newer SDK than global.json pins. Install the pinned one
+      # explicitly rather than letting bootstrap apt-install it: faster, cached,
+      # and it keeps CI on exactly the SDK a developer runs (TRAP-8).
+      - name: Install the pinned .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
       - name: Install shellcheck
         run: sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+
+      # Maven Central rate-limits when both matrix legs fetch at once (HTTP 429).
+      # Cache the jar so a green run does not depend on someone else's quota.
+      - name: Cache the SBE generator jar
+        uses: actions/cache@v4
+        with:
+          path: tools/sbe-csharp-gen/*.jar
+          key: sbe-jar-${{ hashFiles('sbe-version.txt') }}
 
       - name: Bootstrap
         run: SUDO=sudo bash scripts/bootstrap.sh
