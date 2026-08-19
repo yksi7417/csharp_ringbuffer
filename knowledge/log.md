@@ -1,5 +1,13 @@
 # Directory Update Log
 
+## 2026-08-19 (Phase 2)
+* **Correction**: [D1](/decisions/d1-claim-commit-with-padding.md) and
+  [padding records](/concepts/padding-records.md) described three leftover cases. There are
+  **two**: a sub-header leftover is unreachable while `Alignment >= HeaderLength`. Established
+  by the exhaustive test in task 2.4, not by argument.
+* **Update**: [R3 retired](/risks/risk-register.md) — the project's main design risk,
+  eliminated before any memory or concurrency existed to obscure a failure.
+
 ## 2026-08-19
 * **Creation**: Added [the implementation loop](/practices/implementation-loop.md), covering
   how to work `IMPL/PLAN.md` and why the plan is deliberately kept outside this bundle.

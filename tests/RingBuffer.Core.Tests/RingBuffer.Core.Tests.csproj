@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>RingBuffer.Core.Tests</AssemblyName>
+    <RootNamespace>RingBuffer.Core.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/RingBuffer.Core/RingBuffer.Core.csproj" />
+  </ItemGroup>
+</Project>

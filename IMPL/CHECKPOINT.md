@@ -4,20 +4,19 @@ Where the implementation stands. Updated in the same commit as the task it recor
 
 ## Position
 
-**Phases 0 and 1 complete. Phase 2 — ring algebra. Task 2.1 is next.**
+**Phases 0, 1 and 2 complete. [R3 is retired.](../knowledge/risks/risk-register.md)
+Phase 3 — ATDD scaffolding. Task 3.1 is next.**
 
 `gate.sh full` is green with 12 steps passing; only `conformance` is N/A, waiting on the
-Phase 3 corpus. 9 codec tests pass, including schema evolution and zero allocation.
+corpus Phase 3 builds. 40 tests pass: 9 codec, 31 ring algebra.
 
 ## Next unblocked task
 
-**2.1 — `RecordHeader` encode/decode.** No prerequisites beyond 0.3.
+**3.1 — journal reader/writer**, length-prefixed SBE frames. Needs 1.3 (done).
 
-Phase 2 is the one that matters most: it extracts the
-[D1](../knowledge/decisions/d1-claim-commit-with-padding.md) padding arithmetic into pure
-total functions and tests them exhaustively, **retiring
-[R3](../knowledge/risks/risk-register.md) before any memory or concurrency exists to obscure
-it**. Task 2.4 is the exhaustive `PaddingPlan` test.
+Phase 3 writes the acceptance scaffolding **before** the rings it exercises. The
+bootstrapping problem — fixtures are produced by the harness that needs the ring under test —
+is resolved by building the trivially-correct `List<byte[]>` reference queue first (3.3).
 
 ## Progress
 
@@ -25,14 +24,14 @@ it**. Task 2.4 is the exhaustive `PaddingPlan` test.
 |---|---|---|
 | 0 — Toolchain and gate | **13** | 13 |
 | 1 — Schemas and codecs | **11** | 11 |
-| 2 — Ring algebra | 0 | 9 |
+| 2 — Ring algebra | **9** | 9 |
 | 3 — ATDD scaffolding | 0 | 11 |
 | 4 — SPSC ring | 0 | 15 |
 | 5 — MPSC, concurrency, ARM64 | 0 | 11 |
 | 6 — Triangulation and corpus | 0 | 6 |
 | 7 — Performance | 0 | 6 |
 | 8 — Teaching artifacts | 0 | 10 |
-| **Total** | **24** | **92** |
+| **Total** | **33** | **92** |
 
 ## CI
 
@@ -72,6 +71,27 @@ observed going red:
 | `no-lock` | a `lock` statement in `src/` | caught, exit 1 |
 | `deferred-work` | orphan `DEFERRED:` marker; entry missing **Why** | both caught |
 | `dispatch` (TRAP-3) | a lane listing a step with no `step_` function | caught, exit 1 |
+
+## Found while building Phase 2
+
+- **The exhaustive test disproved part of the design.**
+  [D1](../knowledge/decisions/d1-claim-commit-with-padding.md) described three leftover cases
+  and singled out the sub-header one as "the one that will be got wrong". It is **unreachable
+  while `Alignment >= HeaderLength`** — both record lengths are multiples of `Alignment`, so
+  their difference is too. There are two cases, not three. The bundle is corrected and the
+  constant relation is now asserted at runtime rather than assumed. This is Phase 2 doing
+  exactly its job: the cheapest possible place to learn a design was more complicated than it
+  needed to be.
+- **A hand-written test case was wrong where the exhaustive one was right.** My
+  `[InlineData(16, 0, 16, 8)]` should have been `(8, 16)`; the 8-million-pair sweep passed
+  while my hand-picked case failed. Kept in the file with a comment, because it is the
+  argument for exhaustiveness in miniature.
+- **`banned-members` was too blunt and would have taught people to ignore it.** It flagged
+  six string interpolations inside exception messages — the throw path, which is not the hot
+  path by definition. Demanding an exemption marker on each would train people to sprinkle
+  `ALLOW-ALLOC`, which is how a ban quietly stops meaning anything. The rule now exempts
+  `throw new ...;` spans, computed over the whole file: my first attempt tracked parens
+  incrementally and got multi-line throws wrong.
 
 ## Found while building Phase 1
 

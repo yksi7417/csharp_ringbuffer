@@ -43,6 +43,13 @@ BANNED = [
 # A line carrying this marker is exempt, and must say why on the same line.
 ALLOW = re.compile(r"//\s*ALLOW-ALLOC:\s*(\S.*)")
 
+# Allocation inside a throw statement is not on the hot path by definition: an
+# exception already costs orders of magnitude more than building its message, and
+# the throw path runs once before unwinding. Demanding an exemption marker on
+# every exception message would train people to sprinkle ALLOW-ALLOC, which is how
+# a ban quietly stops meaning anything.
+THROW_START = re.compile(r"\bthrow\s+new\b")
+
 
 def scanned_files() -> list[Path]:
     if not SRC.is_dir():
@@ -53,15 +60,36 @@ def scanned_files() -> list[Path]:
     ]
 
 
+def throw_lines(text: str) -> set[int]:
+    """Line numbers covered by a `throw new ...;` statement.
+
+    Allocation there is not on the hot path by definition: an exception already
+    costs orders of magnitude more than building its message, and the throw path
+    runs once before unwinding. Computed as spans over the whole file rather than
+    tracked incrementally, because multi-line throws are the common case here and
+    incremental paren counting got it wrong.
+    """
+    covered: set[int] = set()
+    for m in re.finditer(r"\bthrow\s+new\b.*?;", text, re.S):
+        first = text.count("\n", 0, m.start()) + 1
+        last = text.count("\n", 0, m.end()) + 1
+        covered.update(range(first, last + 1))
+    return covered
+
+
 def main() -> int:
     findings: list[str] = []
     files = scanned_files()
 
     for path in files:
-        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        text = path.read_text(encoding="utf-8")
+        exempt = throw_lines(text)
+
+        for lineno, line in enumerate(text.splitlines(), 1):
             stripped = line.strip()
-            if stripped.startswith("//"):
+            if stripped.startswith("//") or lineno in exempt:
                 continue
+
             allow = ALLOW.search(line)
             if allow:
                 # An exemption must carry a reason; a bare marker is how a ban
@@ -69,6 +97,7 @@ def main() -> int:
                 if not allow.group(1).strip():
                     findings.append(f"{path}:{lineno}: ALLOW-ALLOC with no reason given")
                 continue
+
             for pattern, why, instead in BANNED:
                 if pattern.search(line):
                     findings.append(
@@ -86,7 +115,8 @@ def main() -> int:
         print(f"\nbanned-members: FAILED -- {len(findings)} finding(s)", file=sys.stderr)
         return 1
 
-    print(f"banned-members: OK -- {len(files)} file(s) scanned")
+    print(f"banned-members: OK -- {len(files)} file(s) scanned, "
+          f"throw statements exempt")
     return 0
 
 

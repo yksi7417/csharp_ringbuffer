@@ -112,18 +112,27 @@ No memory, no threads, no ring. Total functions over integers, tested exhaustive
 
 | ID | Task | Done when | Needs | Size |
 |---|---|---|---|---|
-| 2.1 | `RecordHeader` encode/decode | Length and type round-trip; negative length reads as uncommitted | 0.3 | S |
-| 2.2 | `Align.To8(int)` | Exhaustive over `0..64K`; `Align(x) >= x`, `Align(x) % 8 == 0`, idempotent | 0.3 | S |
-| 2.3 | **`PaddingPlan.For(claimedLength, actualLength)`** | Returns the committed length and the optional padding-record offset/length | 2.1, 2.2 | M |
-| 2.4 | **Exhaustive test of `PaddingPlan`** | **All** `(claimed, actual)` pairs where `0 <= actual <= claimed <= 4096`. Invariant: committed + padding **exactly** covers claimed, and every emitted padding record is `>= 8` bytes | 2.3 | L |
-| 2.5 | Named tests for the three leftover cases | `== 0`, `>= 8`, and **`< 8` folded into the committed length** ([padding records](../knowledge/concepts/padding-records.md)) | 2.4 | M |
-| 2.6 | `WrapPlan.For(tailIndex, required, capacity)` | Decides pad-and-restart vs write-in-place | 2.2 | M |
-| 2.7 | Exhaustive test of `WrapPlan` | Every `(tailIndex, required)` for a small capacity; a message never straddles the end | 2.6 | M |
-| 2.8 | `Position` arithmetic (mask, occupancy, available) | Property: `available == capacity - (tail - head)` for all valid pairs | 2.2 | S |
-| 2.9 | **Position arithmetic at `long.MaxValue`** | Seeded directly; behaviour holds across the 64-bit boundary ([L1](../knowledge/testing/l1-unit.md)) | 2.8 | M |
+| ✅ 2.1 | `RecordHeader` encode/decode | Length and type round-trip; negative length reads as uncommitted | 0.3 | S |
+| ✅ 2.2 | `Align.To8(int)` | Exhaustive over `0..64K`; `Align(x) >= x`, `Align(x) % 8 == 0`, idempotent | 0.3 | S |
+| ✅ 2.3 | **`PaddingPlan.For(claimedLength, actualLength)`** | Returns the committed length and the optional padding-record offset/length | 2.1, 2.2 | M |
+| ✅ 2.4 | **Exhaustive test of `PaddingPlan`** | **All** `(claimed, actual)` pairs where `0 <= actual <= claimed <= 4096`. Invariant: committed + padding **exactly** covers claimed, and every emitted padding record is `>= 8` bytes | ✅ 2.3 | L |
+| ✅ 2.5 | Named tests for the three leftover cases | `== 0`, `>= 8`, and **`< 8` folded into the committed length** ([padding records](../knowledge/concepts/padding-records.md)) | ✅ 2.4 | M |
+| ✅ 2.6 | `WrapPlan.For(tailIndex, required, capacity)` | Decides pad-and-restart vs write-in-place | ✅ 2.2 | M |
+| ✅ 2.7 | Exhaustive test of `WrapPlan` | Every `(tailIndex, required)` for a small capacity; a message never straddles the end | ✅ 2.6 | M |
+| ✅ 2.8 | `Position` arithmetic (mask, occupancy, available) | Property: `available == capacity - (tail - head)` for all valid pairs | ✅ 2.2 | S |
+| ✅ 2.9 | **Position arithmetic at `long.MaxValue`** | Seeded directly; behaviour holds across the 64-bit boundary ([L1](../knowledge/testing/l1-unit.md)) | ✅ 2.8 | M |
 
-**Phase 2 exit:** [R3 is retired.](../knowledge/risks/risk-register.md) The padding arithmetic
-is proven exhaustively, in isolation, before any concurrency exists to obscure it.
+**Phase 2 exit — met on 2026-08-19. [R3 is retired.](../knowledge/risks/risk-register.md)**
+31 tests, of which the exhaustive `PaddingPlan` pass alone checks over 8 million
+`(claimed, actual)` pairs against four invariants, in about 7 seconds.
+
+It also **disproved part of the design**. D1 described three leftover cases and singled out
+the sub-header one as "the one that will be got wrong". It is unreachable while
+`Alignment >= HeaderLength`, so there are two. The knowledge bundle is corrected; the
+constant relation is now asserted at runtime rather than assumed.
+
+That is the phase working exactly as intended: the cheapest possible place to find out that a
+design was more complicated than it needed to be.
 
 ---
 

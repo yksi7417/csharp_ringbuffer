@@ -28,18 +28,26 @@ consumer needs no change to support it because it already skips padding for reas
 
 # The boundary cases
 
-The leftover after a short commit has **three cases and they are not symmetric**:
+The leftover after a short commit has **exactly two cases**:
 
 | Leftover | Action |
 |---|---|
 | `== 0` | Nothing to do. |
 | `>= 8` | Write a padding header. |
-| `< 8` | **Cannot hold a header.** Must be folded into the committed length. |
 
-The third case is the one that will be got wrong, because it is the only one where the
-committed length is **not** the encoder's actual length. Getting it wrong leaves an
-unreadable gap that desynchronises the consumer for the rest of the buffer's life — a
-failure that appears far from its cause.
+**A leftover of 1–7 bytes cannot occur.** Both the claimed and the committed record lengths
+are multiples of `Alignment`, so their difference is too; and `Alignment >= HeaderLength`, so
+any non-zero difference is large enough to hold a padding header.
 
-It has dedicated tests in [L1](/testing/l1-unit.md), and randomised message sizes in
-[L2](/testing/l2-property.md) exist largely to hit it.
+This concept previously described a third case — a sub-header leftover folded into the
+committed length — and named it the one most likely to be got wrong. Task 2.4 checked every
+`(claimed, actual)` pair to 4 KiB and found it unreachable. Corrected 2026-08-19.
+
+**What still matters** is the invariant underneath, and that is what the tests assert:
+committed length plus padding length must cover the claim **exactly**. Under-covering leaves
+an unreadable gap that desynchronises the consumer for the rest of the buffer's life — a
+failure that appears far from its cause. Over-covering corrupts the next record.
+
+The guarantee is structural, not defensive, so it is easy to break by accident:
+`RecordDescriptor.Alignment` dropping below `HeaderLength` would reintroduce the case.
+`PaddingPlan.For` throws rather than silently emitting an unusable padding record.

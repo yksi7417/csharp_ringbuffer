@@ -41,12 +41,22 @@ The consumer already skips padding records, so this needs no consumer change. Se
 
 - Zero copy is preserved. This is the whole point.
 - Cost is one 8-byte header when the estimate overshoots.
-- **The leftover has three boundary cases and they are not symmetric:**
+- **The leftover has only two cases, not three.** This was established by task 2.4, which
+  checks every `(claimed, actual)` pair to 4 KiB:
   - leftover `== 0` — nothing to do.
   - leftover `>= 8` — write a padding header.
-  - leftover `< 8` — **cannot hold a header**, so it must be folded into the committed
-    length rather than left as an unreadable gap.
-  That third case is the one that will be got wrong. It has dedicated tests.
+
+  **Corrected 2026-08-19.** This decision originally described a third case — a leftover of
+  fewer than 8 bytes, too small to hold a header, needing to be folded into the committed
+  length — and called it "the one that will be got wrong". It is **unreachable by
+  construction**: both the claimed and committed record lengths are multiples of `Alignment`,
+  so their difference is too, and `Alignment >= HeaderLength` means any non-zero difference
+  has room for a header.
+
+  The design is therefore simpler than it was specified to be, and the reasoning now rests on
+  a relation between two constants rather than on a branch. `PaddingPlan.For` asserts that
+  relation at runtime instead of assuming it, because it stops holding the moment someone
+  sets `Alignment` below `HeaderLength`.
 - This is a deliberate extension beyond Agrona, so it carries
   [R3](/risks/index.md), the project's main design risk. It is covered by dedicated boundary
   tests ([L1](/testing/l1-unit.md)), randomised sizes ([L2](/testing/l2-property.md)), and
