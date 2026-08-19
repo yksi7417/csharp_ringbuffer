@@ -1,0 +1,15 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Tests deliberately poke at edge cases the analysers dislike (unused
+         locals to force evaluation, deliberate overflow). Keep warnings visible
+         but do not let them block a red-green-refactor cycle. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- CA1707: underscored test names are deliberate - they read as sentences
+         in the runner output, which is the point of a test name.
+         CS9057: xunit.analyzers ships against a newer Roslyn than the SDK. -->
+    <NoWarn>$(NoWarn);CA1707;CS9057</NoWarn>
+  </PropertyGroup>
+</Project>

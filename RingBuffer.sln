@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RingBuffer.Sbe", "src\RingB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RingBuffer.Core", "src\RingBuffer.Core\RingBuffer.Core.csproj", "{4AC4BFD1-7F15-44AC-B8D1-C110088F8D24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RingBuffer.Codecs", "src\RingBuffer.Codecs\RingBuffer.Codecs.csproj", "{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{27C5508C-5945-4406-A0CA-30462DAD0A48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RingBuffer.Codecs.Tests", "tests\RingBuffer.Codecs.Tests\RingBuffer.Codecs.Tests.csproj", "{5BDBEE32-0071-445D-801E-2ED2293EA5F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +32,19 @@ Global
 		{4AC4BFD1-7F15-44AC-B8D1-C110088F8D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AC4BFD1-7F15-44AC-B8D1-C110088F8D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AC4BFD1-7F15-44AC-B8D1-C110088F8D24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BDBEE32-0071-445D-801E-2ED2293EA5F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BDBEE32-0071-445D-801E-2ED2293EA5F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BDBEE32-0071-445D-801E-2ED2293EA5F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BDBEE32-0071-445D-801E-2ED2293EA5F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{65773708-17C1-41F1-AC38-13702903E43E} = {8CB2C07F-A303-4D8A-8EE6-B1A1E52EF6CB}
 		{4AC4BFD1-7F15-44AC-B8D1-C110088F8D24} = {8CB2C07F-A303-4D8A-8EE6-B1A1E52EF6CB}
+		{67B5BCCF-F4F1-428C-A1F6-54472BDC01CD} = {8CB2C07F-A303-4D8A-8EE6-B1A1E52EF6CB}
+		{5BDBEE32-0071-445D-801E-2ED2293EA5F2} = {27C5508C-5945-4406-A0CA-30462DAD0A48}
 	EndGlobalSection
 EndGlobal

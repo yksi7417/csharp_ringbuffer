@@ -112,13 +112,7 @@ step_unit_tests() {
 
 step_codegen_clean() {
     [ -f scripts/generate-codecs.sh ] || { echo "no codegen yet"; return $NOT_APPLICABLE; }
-    scripts/generate-codecs.sh >/dev/null
-    # git status --porcelain, NOT git diff: git diff cannot see an untracked
-    # generated file, which is trap TRAP-2 in docs/TRAPS.md.
-    local dirty
-    dirty=$(git status --porcelain --untracked-files=all -- src/RingBuffer.Codecs 2>/dev/null || true)
-    [ -z "$dirty" ] || { echo "generated codecs are stale:"; echo "$dirty"; return 1; }
-    echo "generated codecs are up to date"
+    scripts/ci/checks/codegen_fresh.sh
 }
 
 step_conformance() {

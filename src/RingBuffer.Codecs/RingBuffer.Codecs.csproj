@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>RingBuffer.Codecs</AssemblyName>
+    <RootNamespace>RingBuffer.Codecs</RootNamespace>
+    <!-- Generated code, not held to our warning bar, for the same reason the
+         vendored runtime is not: we do not edit it, so we cannot fix it. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);1591;CS0169;IDE0055</NoWarn>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <AnalysisLevel>none</AnalysisLevel>
+
+    <!-- MSBuild evaluates the default Compile glob BEFORE any BeforeCompile
+         target runs. With the glob left on, sources generated during the build
+         are invisible to the compiler and the build succeeds having compiled
+         nothing. Turning it off and adding the files inside the target is what
+         makes generation actually reach the compiler. See TRAP-7. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <CodegenStamp>$(MSBuildProjectDirectory)/obj/.codegen-stamp</CodegenStamp>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../RingBuffer.Sbe/RingBuffer.Sbe.csproj" />
+    <!-- Re-run generation when a schema or the shim changes. -->
+    <SbeInput Include="$(MSBuildProjectDirectory)/../../schemas/*.xml" />
+    <SbeInput Include="$(MSBuildProjectDirectory)/../../tools/sbe-csharp-gen/SbeCsharpGen.java" />
+  </ItemGroup>
+
+  <Target Name="GenerateSbeCodecs" BeforeTargets="BeforeCompile"
+          Inputs="@(SbeInput)" Outputs="$(CodegenStamp)">
+    <Exec Command="bash &quot;$(MSBuildProjectDirectory)/../../scripts/generate-codecs.sh&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)/../.."
+          EnvironmentVariables="LC_ALL=C.UTF-8" />
+    <Touch Files="$(CodegenStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <!-- Runs on EVERY build, not only when generation ran, so a wiped codec
+       directory cannot slip through as an empty-but-successful compile. -->
+  <Target Name="CollectSbeCodecs" AfterTargets="GenerateSbeCodecs" BeforeTargets="BeforeCompile">
+    <ItemGroup>
+      <GeneratedCodec Include="$(MSBuildProjectDirectory)/**/*.g.cs" />
+      <Compile Include="@(GeneratedCodec)" />
+    </ItemGroup>
+    <Error Condition="'@(GeneratedCodec)' == ''"
+           Text="No generated codecs found. The generator exits 0 when it writes nothing (TRAP-1); run scripts/generate-codecs.sh and check its output." />
+  </Target>
+
+</Project>

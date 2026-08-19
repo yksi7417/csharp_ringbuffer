@@ -5,7 +5,9 @@ artifacts/
 
 # Generated SBE codecs -- regenerated per build, never committed.
 # CI asserts freshness; see knowledge/architecture/repository-layout.md.
-src/RingBuffer.Codecs/
+# Generated SBE codecs. CSharpNamespaceOutputManager writes into a namespace
+# subdirectory, so this must be recursive.
+src/RingBuffer.Codecs/**/*.g.cs
 
 # Fetched toolchain
 tools/sbe-csharp-gen/*.jar
@@ -18,3 +20,4 @@ BenchmarkDotNet.Artifacts/
 .vs/
 .idea/
 *.user
+.codegen-stamp

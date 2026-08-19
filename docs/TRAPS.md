@@ -91,3 +91,32 @@ Authoring rule, now stated in
 [the practice](../knowledge/practices/deferred-work-register.md): when writing *about*
 markers, never put the keyword and the id adjacent — say "a `T-4` reference" rather than
 spelling out the live form. Caught by the pre-push hook, before it reached the remote.
+
+## TRAP-7 — A build succeeded having compiled none of its generated sources
+
+**What looked green:** `dotnet build`. It reported success, 0 warnings, 0 errors, over a
+codec project whose generated sources had just been deleted.
+
+**Why it did not catch it:** two independent faults, either of which alone produces a
+convincing green:
+
+1. **MSBuild evaluates the default `Compile` glob before any `BeforeCompile` target runs.**
+   Sources generated during the build are therefore invisible to the compiler. The project
+   compiled zero files and succeeded, because compiling nothing is not an error.
+2. **The generator writes into a namespace subdirectory.**
+   `CSharpNamespaceOutputManager` creates `RingBuffer_Codecs/` beneath the output directory,
+   so a non-recursive `*.g.cs` glob matched nothing while the generator's own log line
+   correctly reported 12 files written.
+
+The generator was working the whole time. Every signal said fine.
+
+**Guard:** `EnableDefaultCompileItems` is off; `CollectSbeCodecs` adds `**/*.g.cs` to
+`@(Compile)` inside the target and **errors when the item list is empty**. That target runs on
+every build, not only when generation ran, so a wiped codec directory cannot pass as an
+empty-but-successful compile. Verified by deleting the generated sources and watching the
+build go red.
+
+**Also:** the freshness check cannot be a `git status` check here. Generated sources are
+gitignored, and git does not report ignored files — so a git-based check would pass
+*unconditionally*. That is worse than TRAP-2: not a check that misses a case, a check that can
+never fail. `scripts/ci/checks/codegen_fresh.sh` hashes the tree, regenerates, and compares.

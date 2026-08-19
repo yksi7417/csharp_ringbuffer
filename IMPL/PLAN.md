@@ -82,13 +82,13 @@ observed from a fresh session.
 
 | ID | Task | Done when | Needs | Size |
 |---|---|---|---|---|
-| 1.1 | `tools/sbe-csharp-gen/` — productionise the shim | Builds from source; **not** `-Dsbe.target.language` ([F2](../knowledge/findings/f2-csharp-codegen-requires-shim.md)) | 0.4 | M |
-| 1.2 | `scripts/generate-codecs.sh` | Generates into `src/RingBuffer.Codecs/`; stderr **never** discarded ([TRAP-1](../knowledge/practices/trap-log.md)) | 1.1 | S |
-| 1.3 | `schemas/fix-sbe.xml` v1 | `NewOrderSingle` + `NoPartyIDs`; `MarketDataIncrementalRefresh` + **nested** group + var-data ([D8](../knowledge/decisions/d8-schema-selection.md)) | 1.2 | M |
-| 1.4 | Codegen wired into the build | `dotnet build` regenerates before compile | 1.3 | M |
-| 1.5 | `codegen-clean` gate step | Uses `git status --porcelain` **including untracked** ([TRAP-2](../knowledge/practices/trap-log.md)) | 1.4 | S |
-| 1.6 | Generator test: generated code **compiles and round-trips** | Not "files appeared" — a generator that writes nothing exits 0 | 1.4 | M |
-| 1.7 | `schemas/fix-sbe-v2.xml` — appends a field and a group | v2 differs from v1 by addition only | 1.3 | S |
+| ✅ 1.1 | `tools/sbe-csharp-gen/` — productionise the shim | Builds from source; **not** `-Dsbe.target.language` ([F2](../knowledge/findings/f2-csharp-codegen-requires-shim.md)) | 0.4 | M |
+| ✅ 1.2 | `scripts/generate-codecs.sh` | Generates into `src/RingBuffer.Codecs/`; stderr **never** discarded ([TRAP-1](../knowledge/practices/trap-log.md)) | ✅ 1.1 | S |
+| ✅ 1.3 | `schemas/fix-sbe.xml` v1 | `NewOrderSingle` + `NoPartyIDs`; `MarketDataIncrementalRefresh` + **nested** group + var-data ([D8](../knowledge/decisions/d8-schema-selection.md)) | ✅ 1.2 | M |
+| ✅ 1.4 | Codegen wired into the build | `dotnet build` regenerates before compile | ✅ 1.3 | M |
+| ✅ 1.5 | `codegen-clean` gate step | Uses `git status --porcelain` **including untracked** ([TRAP-2](../knowledge/practices/trap-log.md)) | ✅ 1.4 | S |
+| ✅ 1.6 | Generator test: generated code **compiles and round-trips** | Not "files appeared" — a generator that writes nothing exits 0 | ✅ 1.4 | M |
+| 1.7 | `schemas/fix-sbe-v2.xml` — appends a field and a group | v2 differs from v1 by addition only | ✅ 1.3 | S |
 | 1.8 | Schema-evolution test: v2 codec decodes v1 bytes | Absent fields return their null value via `actingVersion` | 1.7 | M |
 | 1.9 | Zero-allocation test harness | `GC.GetAllocatedBytesForCurrentThread()` delta asserted **exactly 0** | 0.3 | M |
 | 1.10 | Zero-alloc assertion over codec encode/decode | Span overloads allocate 0; documents that `string` overloads do not | 1.9 | M |
@@ -127,7 +127,7 @@ Written **before** the rings, per [ATDD](../knowledge/testing/test-pyramid.md).
 
 | ID | Task | Done when | Needs | Size |
 |---|---|---|---|---|
-| 3.1 | Journal reader/writer — length-prefixed SBE frames | Round-trips; deliberately **not** the ring's record format ([replay harness](../knowledge/architecture/replay-harness.md)) | 1.3 | M |
+| 3.1 | Journal reader/writer — length-prefixed SBE frames | Round-trips; deliberately **not** the ring's record format ([replay harness](../knowledge/architecture/replay-harness.md)) | ✅ 1.3 | M |
 | 3.2 | `IRingBuffer` + `Claim` ref struct — signatures only | Compiles; `Claim` **cannot escape to the heap** (verified: a `ref struct` is required, not stylistic) | 0.3 | M |
 | 3.3 | **`ReferenceQueue` — the `List<byte[]>` oracle** | Implements `IRingBuffer`; obviously correct by inspection | 3.2 | M |
 | 3.4 | `IClock` + seeded id source | No `DateTime.Now`, no `Guid.NewGuid()` anywhere on the replay path | 0.3 | S |
