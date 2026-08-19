@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RingBuffer.Sbe</AssemblyName>
+    <RootNamespace>Org.SbeTool.Sbe.Dll</RootNamespace>
+  </PropertyGroup>
+</Project>

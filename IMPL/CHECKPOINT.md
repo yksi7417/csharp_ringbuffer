@@ -4,20 +4,22 @@ Where the implementation stands. Updated in the same commit as the task it recor
 
 ## Position
 
-**Phase 0 — Toolchain and gate. Task 0.1 is next.**
+**Phase 0 complete. Phase 1 — Schemas and codecs. Task 1.1 is next.**
 
-Nothing in [`PLAN.md`](PLAN.md) is claimed yet. The repository contains the
-[knowledge bundle](../knowledge/index.md), the OKF validator, and this plan.
+`scripts/ci/gate.sh` is green on all three lanes over a tree containing no product code, which
+was Phase 0's exit criterion. Everything from here lands gated.
 
 ## Next unblocked task
 
-**0.1 — `scripts/bootstrap.sh`.** No prerequisites.
+**1.1 — `tools/sbe-csharp-gen/`, productionise the shim.** Needs 0.4 (done). The working
+prototype is at
+[`knowledge/references/evidence/SbeCsharpGen.java`](../knowledge/references/evidence/SbeCsharpGen.java).
 
 ## Progress
 
 | Phase | Done | Total |
 |---|---|---|
-| 0 — Toolchain and gate | 0 | 13 |
+| 0 — Toolchain and gate | **13** | 13 |
 | 1 — Schemas and codecs | 0 | 11 |
 | 2 — Ring algebra | 0 | 9 |
 | 3 — ATDD scaffolding | 0 | 11 |
@@ -26,12 +28,47 @@ Nothing in [`PLAN.md`](PLAN.md) is claimed yet. The repository contains the
 | 6 — Triangulation and corpus | 0 | 6 |
 | 7 — Performance | 0 | 6 |
 | 8 — Teaching artifacts | 0 | 10 |
-| **Total** | **0** | **92** |
+| **Total** | **13** | **92** |
+
+## Open from Phase 0
+
+Two things are done but **not yet observed working**, and are marked as such rather than
+claimed:
+
+| | |
+|---|---|
+| **ARM64 leg (0.12)** | The workflow is committed and its YAML validates, but no ARM64 runner exists in this container. Whether the leg is genuinely green is the first thing to check on GitHub. Until then [R4](../knowledge/risks/risk-register.md) is *not* retired. |
+| **SessionStart hook (0.2)** | `.claude/settings.json` is wired and `bootstrap.sh` is verified idempotent, but "a fresh session builds with no manual steps" can only be observed from a fresh session. |
+
+## Guards proven failing, not just passing
+
+Per [green gate is evidence, not proof](../knowledge/practices/green-gate-is-evidence.md), a
+check nobody has watched fail is not yet a check. These were each broken deliberately and
+observed going red:
+
+| Guard | Broken by | Result |
+|---|---|---|
+| `okf-validate` | missing `type`, broken link, orphaned concept, frontmatter in a non-root index, non-ISO log heading, bad `status` | 6/6 caught |
+| `vendored-sbe` | editing a vendored file; adding an unlisted file | both caught, exit 1 |
+| `no-lock` | a `lock` statement in `src/` | caught, exit 1 |
+| `deferred-work` | orphan `DEFERRED:` marker; entry missing **Why** | both caught |
+| `dispatch` (TRAP-3) | a lane listing a step with no `step_` function | caught, exit 1 |
+
+## Found while building Phase 0
+
+- **`deferred_work.py` failed on its first run** — correctly. Trap ids and deferred-work ids
+  were both `T-n`, so a documentation reference to trap `T-4` was indistinguishable from a
+  live marker. Traps are now `TRAP-n`. Recorded as TRAP-6 in [`docs/TRAPS.md`](../docs/TRAPS.md).
+- **`shellcheck` found four real defects** on its first run (unchecked `cd`, unquoted `case`
+  patterns). Fixed; the step is clean.
+- **Vendored runtime is 1,851 lines across 7 files** and builds on net8.0 with **0 warnings**,
+  exactly as [F3](../knowledge/findings/f3-sbe-dll-nuget-stale.md) predicted.
+- **`N/A` had to be distinct from `PASS`.** A gate whose steps mostly have no subject yet
+  would otherwise report a full green over an empty tree. Recorded as TRAP-5.
 
 ## Verified before planning
 
-These were executed in a container, not assumed. They are why the plan commits to a specific
-API shape rather than sketching one:
+Executed in a container, not assumed:
 
 | Claim | Where |
 |---|---|

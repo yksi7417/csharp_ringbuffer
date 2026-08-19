@@ -22,17 +22,23 @@ traps inherited from the reference project that apply directly to us.
 
 | ID | Trap | Our guard |
 |---|---|---|
-| T-1 | A generator whose stderr went to `/dev/null` wrote nothing, and the build passed. | The codec generator's test asserts output **compiles and round-trips**. Generator stderr is never discarded. |
-| T-2 | A `git diff` check could not see an **untracked** generated file, so codegen drift passed green. | Codegen freshness uses `git status --porcelain` **including untracked files**. |
-| T-3 | A gate step listed in a lane had no dispatch case, so the lane silently skipped it and went green. | A lane listing an undispatched step **fails**. |
-| T-4 | Sanitizers compiled the tree and never ran a test. | Any analysis step must assert it **executed** tests, not that it built them. |
+| TRAP-1 | A generator whose stderr went to `/dev/null` wrote nothing, and the build passed. | The codec generator's test asserts output **compiles and round-trips**. Generator stderr is never discarded. |
+| TRAP-2 | A `git diff` check could not see an **untracked** generated file, so codegen drift passed green. | Codegen freshness uses `git status --porcelain` **including untracked files**. |
+| TRAP-3 | A gate step listed in a lane had no dispatch case, so the lane silently skipped it and went green. | A lane listing an undispatched step **fails**. |
+| TRAP-4 | Sanitizers compiled the tree and never ran a test. | Any analysis step must assert it **executed** tests, not that it built them. |
+
+# Numbering
+
+`TRAP-n` belongs to this log. `T-n` belongs to
+[the deferred-work register](deferred-work-register.md) — a separate namespace, and a
+separate kind of thing: a trap is a check that lied, a `T-n` is work we chose to postpone.
 
 # Adding an entry
 
 Format, matching the deferred-work register's discipline:
 
 ```markdown
-## T-n — Short imperative title
+## TRAP-n — Short imperative title
 
 **What looked green:** the check, and what it was supposed to catch.
 

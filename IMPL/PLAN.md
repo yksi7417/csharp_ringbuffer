@@ -52,22 +52,29 @@ Nothing here is product code. The point is that everything after it lands gated.
 
 | ID | Task | Done when | Needs | Size |
 |---|---|---|---|---|
-| 0.1 | `scripts/bootstrap.sh` — apt SDK, JDK check, jar fetch | Runs clean in a fresh container; **does not** call `dotnet-install.sh` ([F1](../knowledge/findings/f1-dotnet-install-egress-blocked.md)) | — | M |
-| 0.2 | `SessionStart` hook invoking bootstrap | A fresh web agent session can `dotnet build` with no manual steps | 0.1 | S |
-| 0.3 | Solution + project skeleton, `Directory.Build.props` | `AllowUnsafeBlocks`, `Nullable`, `TreatWarningsAsErrors`, `LangVersion` set once centrally | 0.1 | M |
-| 0.4 | Vendor SBE runtime at the pinned tag into `src/RingBuffer.Sbe/` | 7 files, 1,851 lines, compiles on net8.0 ([F3](../knowledge/findings/f3-sbe-dll-nuget-stale.md)) | 0.3 | M |
-| 0.5 | `check_vendored_sbe.sh` — re-fetch at tag, assert byte-identical | Editing a vendored file fails the check | 0.4 | M |
-| 0.6 | `scripts/ci/gate.sh` — lanes, `--list`, colour, timing | `--list` prints steps without running them | 0.3 | L |
-| 0.7 | **A lane step with no dispatch case fails the gate** | A deliberately undispatched step goes red, not green ([T-3](../knowledge/practices/trap-log.md)) | 0.6 | S |
-| 0.8 | Wire `okf_validate.py` as the `okf-validate` step | Breaking the bundle fails `gate.sh fast` | 0.6 | S |
-| 0.9 | `deferred_work.py` + seed `docs/TODO.md` | Bidirectional: orphan `DEFERRED:` marker fails; entry missing **Why**/**Done when** fails | 0.6 | M |
-| 0.10 | Seed `docs/TRAPS.md` with T-1..T-4 | Inherited traps recorded with their guards | — | S |
-| 0.11 | `.githooks/pre-push` → `gate.sh fast` | Pushing with a red gate is blocked locally | 0.6 | S |
-| 0.12 | GitHub Actions: **x64 + ARM64 matrix** | Both legs green on an empty tree ([D6](../knowledge/decisions/d6-memory-model-and-arm64.md)) | 0.6 | M |
-| 0.13 | `no-lock` source scan step | Adding a `lock` anywhere in `src/` fails the gate ([D3](../knowledge/decisions/d3-non-blocking-backpressure.md)) | 0.6 | S |
+| ✅ 0.1 | `scripts/bootstrap.sh` — apt SDK, JDK check, jar fetch | Runs clean in a fresh container; **does not** call `dotnet-install.sh` ([F1](../knowledge/findings/f1-dotnet-install-egress-blocked.md)) | — | M |
+| 🟡 0.2 | `SessionStart` hook invoking bootstrap | A fresh web agent session can `dotnet build` with no manual steps | 0.1 | S |
+| ✅ 0.3 | Solution + project skeleton, `Directory.Build.props` | `AllowUnsafeBlocks`, `Nullable`, `TreatWarningsAsErrors`, `LangVersion` set once centrally | 0.1 | M |
+| ✅ 0.4 | Vendor SBE runtime at the pinned tag into `src/RingBuffer.Sbe/` | 7 files, 1,851 lines, compiles on net8.0 ([F3](../knowledge/findings/f3-sbe-dll-nuget-stale.md)) | 0.3 | M |
+| ✅ 0.5 | `check_vendored_sbe.sh` — re-fetch at tag, assert byte-identical | Editing a vendored file fails the check | 0.4 | M |
+| ✅ 0.6 | `scripts/ci/gate.sh` — lanes, `--list`, colour, timing | `--list` prints steps without running them | 0.3 | L |
+| ✅ 0.7 | **A lane step with no dispatch case fails the gate** | A deliberately undispatched step goes red, not green ([TRAP-3](../knowledge/practices/trap-log.md)) | 0.6 | S |
+| ✅ 0.8 | Wire `okf_validate.py` as the `okf-validate` step | Breaking the bundle fails `gate.sh fast` | 0.6 | S |
+| ✅ 0.9 | `deferred_work.py` + seed `docs/TODO.md` | Bidirectional: orphan `DEFERRED:` marker fails; entry missing **Why**/**Done when** fails | 0.6 | M |
+| ✅ 0.10 | Seed `docs/TRAPS.md` with TRAP-1..TRAP-4 | Inherited traps recorded with their guards | — | S |
+| ✅ 0.11 | `.githooks/pre-push` → `gate.sh fast` | Pushing with a red gate is blocked locally | 0.6 | S |
+| ✅ 0.12 | GitHub Actions: **x64 + ARM64 matrix** | Both legs green on an empty tree ([D6](../knowledge/decisions/d6-memory-model-and-arm64.md)) | 0.6 | M |
+| ✅ 0.13 | `no-lock` source scan step | Adding a `lock` anywhere in `src/` fails the gate ([D3](../knowledge/decisions/d3-non-blocking-backpressure.md)) | 0.6 | S |
 
-**Phase 0 exit:** `gate.sh fast` and `gate.sh full` are green on a tree containing no product
-code, on both architectures.
+**Phase 0 exit — met locally on 2026-08-19.** `fast`, `full` and `nightly` are all green on a
+tree containing no product code. Steps whose subject does not exist yet report `N/A`, counted
+separately from passes, never as green (TRAP-5).
+
+Still unproven: the **ARM64 leg**, which cannot run in this container — it needs a real
+`ubuntu-24.04-arm` runner. The workflow is committed and its YAML validates; whether the leg
+is genuinely green is the first thing to confirm on GitHub. 🟡 0.2 is configured and its
+script verified idempotent, but "a fresh session builds with no manual steps" can only be
+observed from a fresh session.
 
 ---
 
@@ -76,10 +83,10 @@ code, on both architectures.
 | ID | Task | Done when | Needs | Size |
 |---|---|---|---|---|
 | 1.1 | `tools/sbe-csharp-gen/` — productionise the shim | Builds from source; **not** `-Dsbe.target.language` ([F2](../knowledge/findings/f2-csharp-codegen-requires-shim.md)) | 0.4 | M |
-| 1.2 | `scripts/generate-codecs.sh` | Generates into `src/RingBuffer.Codecs/`; stderr **never** discarded ([T-1](../knowledge/practices/trap-log.md)) | 1.1 | S |
+| 1.2 | `scripts/generate-codecs.sh` | Generates into `src/RingBuffer.Codecs/`; stderr **never** discarded ([TRAP-1](../knowledge/practices/trap-log.md)) | 1.1 | S |
 | 1.3 | `schemas/fix-sbe.xml` v1 | `NewOrderSingle` + `NoPartyIDs`; `MarketDataIncrementalRefresh` + **nested** group + var-data ([D8](../knowledge/decisions/d8-schema-selection.md)) | 1.2 | M |
 | 1.4 | Codegen wired into the build | `dotnet build` regenerates before compile | 1.3 | M |
-| 1.5 | `codegen-clean` gate step | Uses `git status --porcelain` **including untracked** ([T-2](../knowledge/practices/trap-log.md)) | 1.4 | S |
+| 1.5 | `codegen-clean` gate step | Uses `git status --porcelain` **including untracked** ([TRAP-2](../knowledge/practices/trap-log.md)) | 1.4 | S |
 | 1.6 | Generator test: generated code **compiles and round-trips** | Not "files appeared" — a generator that writes nothing exits 0 | 1.4 | M |
 | 1.7 | `schemas/fix-sbe-v2.xml` — appends a field and a group | v2 differs from v1 by addition only | 1.3 | S |
 | 1.8 | Schema-evolution test: v2 codec decodes v1 bytes | Absent fields return their null value via `actingVersion` | 1.7 | M |

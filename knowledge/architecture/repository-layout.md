@@ -33,7 +33,7 @@ docs/decisions/                   ADR stubs pointing at /decisions in this bundl
 
 A CI step regenerates and asserts the tree is clean. **It must use
 `git status --porcelain` including untracked files, not `git diff`** — this is
-[trap T-2](/practices/trap-log.md), lifted directly from the reference project, where a
+[trap TRAP-2](/practices/trap-log.md), lifted directly from the reference project, where a
 `git diff` check could not see an untracked generated file and passed green while the
 generator was producing nothing.
 

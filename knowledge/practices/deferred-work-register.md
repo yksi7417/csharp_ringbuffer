@@ -32,13 +32,13 @@ because nobody can tell whether it is finished.
 # Mark the code that points at it
 
 ```csharp
-// DEFERRED: T-4 -- memory-mapped backing lands with the cross-process phase
+// DEFERRED: T-1 -- memory-mapped backing lands with the cross-process phase
 ```
 
 **The check is bidirectional:** a `DEFERRED:` marker with no register entry fails, and so
 does an entry that has lost its sections.
 
-So a comment cannot outlive the work it points at. When T-4 lands, the marker goes with it
+So a comment cannot outlive the work it points at. When T-1 lands, the marker goes with it
 or the build breaks — which is the only reliable way stale `TODO` comments ever get
 removed.
 
@@ -51,7 +51,14 @@ removed.
 It is a register of **decided-and-deferred work**, not a wish list. A wish list nobody
 prunes is indistinguishable from noise within a month.
 
+# Numbering
+
+`T-n` belongs to **this** register. Trap-log entries use `TRAP-n` and are a separate
+namespace — see [the trap log](trap-log.md). They were briefly the same namespace, and the
+collision was confusing enough to be worth the rename.
+
 # Current entries
 
-[D10](/decisions/d10-cross-process-deferred.md) (cross-process shared memory) is registered
-so it cannot quietly evaporate.
+The live register is [`docs/TODO.md`](../../docs/TODO.md). It carries the cross-process ring
+([D10](/decisions/d10-cross-process-deferred.md)), the triangulation harness, and the latency
+baselines — each deferred deliberately, each with a condition that closes it.

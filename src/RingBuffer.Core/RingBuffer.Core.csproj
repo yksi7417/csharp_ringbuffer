@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RingBuffer.Core</AssemblyName>
+    <RootNamespace>RingBuffer.Core</RootNamespace>
+  </PropertyGroup>
+  <!-- Deliberately NO reference to RingBuffer.Codecs. The ring carries opaque
+       bytes; SBE is a payload concern (D7). See repository-layout.md. -->
+</Project>

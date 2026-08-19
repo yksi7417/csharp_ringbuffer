@@ -38,7 +38,7 @@ where "it passed locally" and "it passed in CI" mean the same thing.
 
 # A lane listing a step with no dispatch case must FAIL
 
-Not warn, not skip. This is [T-3](trap-log.md) from the reference project — a gate step
+Not warn, not skip. This is [TRAP-3](trap-log.md) from the reference project — a gate step
 listed in a lane with no matching dispatch case silently did nothing, and the lane went
 green.
 

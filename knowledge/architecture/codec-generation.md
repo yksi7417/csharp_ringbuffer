@@ -39,7 +39,7 @@ Enforced by two gate steps:
 1. **Vendored-runtime integrity** — re-fetch `csharp/sbe-dll/*.cs` at the pinned tag and
    assert the committed copy is byte-identical. The pin cannot silently drift.
 2. **Codegen freshness** — regenerate and assert the tree is clean, via
-   `git status --porcelain` (see [T-2](/practices/trap-log.md)).
+   `git status --porcelain` (see [TRAP-2](/practices/trap-log.md)).
 
 # This component needs its own tests
 
@@ -47,7 +47,7 @@ It is the load-bearing step nobody else maintains for us. Its test generates a k
 and asserts the output **compiles and round-trips** — not merely that files appeared.
 
 A generator that writes nothing exits 0. That is
-[T-1](/practices/trap-log.md), and it is why "files appeared" is not the assertion.
+[TRAP-1](/practices/trap-log.md), and it is why "files appeared" is not the assertion.
 
 # Related
 

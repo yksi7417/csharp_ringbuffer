@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Run the fast gate before every push. Same script CI runs.
+#   enable with: git config core.hooksPath .githooks
+#   bypass once: git push --no-verify   (you will answer for it in CI)
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$REPO_ROOT/scripts/ci/gate.sh" fast

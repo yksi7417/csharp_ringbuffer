@@ -48,9 +48,9 @@ reasoning about. Delete the thing; watch the check fail; put it back.
 This is why:
 
 - codegen freshness uses `git status --porcelain` including untracked files, not
-  `git diff` ([T-2](trap-log.md))
+  `git diff` ([TRAP-2](trap-log.md))
 - the codec generator's test asserts the output **compiles and round-trips**, not that files
-  appeared ([T-1](trap-log.md))
+  appeared ([TRAP-1](trap-log.md))
 - [false sharing](/concepts/false-sharing.md) has a deliberately-unpadded benchmark, so the
   padding's value stays a visible number
-- a lane with an undispatched step **fails** ([T-3](trap-log.md))
+- a lane with an undispatched step **fails** ([TRAP-3](trap-log.md))

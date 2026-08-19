@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+artifacts/
+
+# Generated SBE codecs -- regenerated per build, never committed.
+# CI asserts freshness; see knowledge/architecture/repository-layout.md.
+src/RingBuffer.Codecs/
+
+# Fetched toolchain
+tools/sbe-csharp-gen/*.jar
+tools/sbe-csharp-gen/out/
+
+# Benchmark output
+BenchmarkDotNet.Artifacts/
+
+# Editor
+.vs/
+.idea/
+*.user

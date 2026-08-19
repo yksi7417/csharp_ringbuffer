@@ -47,4 +47,4 @@ catch it, but knowing why saves the debugging.
   `src/RingBuffer.Codecs/`, that is expected — they are gitignored.
 - **Never edit generated code.** Change the schema.
 - If the generator appears to succeed but writes nothing, check that its stderr is not being
-  discarded — that is [T-1](/practices/trap-log.md), and it exits 0.
+  discarded — that is [TRAP-1](/practices/trap-log.md), and it exits 0.

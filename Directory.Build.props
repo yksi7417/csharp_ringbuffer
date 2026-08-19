@@ -1,0 +1,29 @@
+<Project>
+
+  <!-- Central build settings. Set once here rather than per-project, so a new
+       project cannot quietly opt out of the standards the gate assumes. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- The ring buffer writes through raw pointers into off-heap memory (D4). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- A warning that nobody has to fix is a warning nobody reads. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>9999</WarningLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+
+    <!-- Deterministic output, so a rebuild of the same source is byte-identical.
+         The project's whole testing story rests on determinism (L4). -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

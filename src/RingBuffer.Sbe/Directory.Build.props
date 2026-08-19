@@ -1,0 +1,14 @@
+<Project>
+  <!-- Import the repo-wide settings, then relax them: this directory is vendored
+       upstream source (F3) and is deliberately not edited to satisfy our analysers.
+       Holding third-party code to our warning bar would force us to modify it,
+       which would break the byte-identity check in check_vendored_sbe.sh (0.5). -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);1591;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CA1069;IDE0055</NoWarn>
+    <Nullable>disable</Nullable>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <AnalysisLevel>none</AnalysisLevel>
+  </PropertyGroup>
+</Project>
