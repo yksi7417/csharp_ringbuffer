@@ -51,6 +51,17 @@ removed.
 It is a register of **decided-and-deferred work**, not a wish list. A wish list nobody
 prunes is indistinguishable from noise within a month.
 
+# Writing *about* markers
+
+The scanner cannot tell prose about a marker from a marker. So when documenting the
+convention, **never put the keyword and the id adjacent** — write "a `T-1` reference" rather
+than spelling out the live form. Otherwise the documentation registers itself as deferred
+work pointing at an entry that does not exist.
+
+This has tripped the check twice (TRAP-6). It is an authoring rule, not a bug in the check:
+loosening the scanner to allow "documentation" markers would mean a real orphaned marker in a
+`.md` file goes unnoticed.
+
 # Numbering
 
 `T-n` belongs to **this** register. Trap-log entries use `TRAP-n` and are a separate

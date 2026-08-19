@@ -59,6 +59,11 @@ observed going red:
 - **`deferred_work.py` failed on its first run** — correctly. Trap ids and deferred-work ids
   were both `T-n`, so a documentation reference to trap `T-4` was indistinguishable from a
   live marker. Traps are now `TRAP-n`. Recorded as TRAP-6 in [`docs/TRAPS.md`](../docs/TRAPS.md).
+- **The pre-push hook earned itself on its first use.** It blocked the Phase 0 push: writing
+  TRAP-6 re-tripped the very check it describes, because documenting a marker means writing
+  one. The scanner cannot tell prose about a marker from a marker, so the fix is an authoring
+  rule rather than a loosened check — loosening it would let a real orphaned marker in a
+  `.md` file through.
 - **`shellcheck` found four real defects** on its first run (unchecked `cd`, unquoted `case`
   patterns). Fixed; the step is clean.
 - **Vendored runtime is 1,851 lines across 7 files** and builds on net8.0 with **0 warnings**,

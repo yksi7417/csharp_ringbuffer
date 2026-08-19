@@ -77,10 +77,17 @@ yet applicable.
 ## TRAP-6 — Traps and deferred work shared one `T-n` namespace
 
 **What looked green:** `deferred_work.py`, briefly — it failed for what looked like a bug in
-the check, on `DEFERRED: T-4` in the register's own documentation.
+the check, on a `T-4` reference inside the register's own documentation.
 
 **Why it mattered:** it was not a false positive. Trap ids and deferred-work ids were both
 `T-n`, so a reference to trap `T-4` was indistinguishable from a marker pointing at
 deferred-work entry `T-4`. Confusing for a person, unresolvable for a script.
 
 **Guard:** traps are `TRAP-n`, deferred work is `T-n`. Both registers state the split.
+
+**And a second time.** Writing this very entry re-tripped the check, because describing a
+marker means writing one. The scanner cannot distinguish prose about a marker from a marker.
+Authoring rule, now stated in
+[the practice](../knowledge/practices/deferred-work-register.md): when writing *about*
+markers, never put the keyword and the id adjacent — say "a `T-4` reference" rather than
+spelling out the live form. Caught by the pre-push hook, before it reached the remote.
