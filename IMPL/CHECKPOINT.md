@@ -4,24 +4,27 @@ Where the implementation stands. Updated in the same commit as the task it recor
 
 ## Position
 
-**Phase 0 complete. Phase 1 in progress — 6 of 11 done. Task 1.7 is next.**
+**Phases 0 and 1 complete. Phase 2 — ring algebra. Task 2.1 is next.**
 
-Schemas generate codecs that round-trip nested repeating groups through off-heap memory, and
-`gate.sh full` is green with 10 steps passing. Only `conformance` is still N/A, waiting on the
-Phase 3 corpus.
+`gate.sh full` is green with 12 steps passing; only `conformance` is N/A, waiting on the
+Phase 3 corpus. 9 codec tests pass, including schema evolution and zero allocation.
 
 ## Next unblocked task
 
-**1.7 — `schemas/fix-sbe-v2.xml`**, appending a field and a group to v1. Needs 1.3 (done).
-Then 1.8 (evolution test), 1.9–1.10 (zero-allocation harness and assertions), 1.11
-(banned-members lint).
+**2.1 — `RecordHeader` encode/decode.** No prerequisites beyond 0.3.
+
+Phase 2 is the one that matters most: it extracts the
+[D1](../knowledge/decisions/d1-claim-commit-with-padding.md) padding arithmetic into pure
+total functions and tests them exhaustively, **retiring
+[R3](../knowledge/risks/risk-register.md) before any memory or concurrency exists to obscure
+it**. Task 2.4 is the exhaustive `PaddingPlan` test.
 
 ## Progress
 
 | Phase | Done | Total |
 |---|---|---|
 | 0 — Toolchain and gate | **13** | 13 |
-| 1 — Schemas and codecs | **6** | 11 |
+| 1 — Schemas and codecs | **11** | 11 |
 | 2 — Ring algebra | 0 | 9 |
 | 3 — ATDD scaffolding | 0 | 11 |
 | 4 — SPSC ring | 0 | 15 |
@@ -29,13 +32,22 @@ Then 1.8 (evolution test), 1.9–1.10 (zero-allocation harness and assertions), 
 | 6 — Triangulation and corpus | 0 | 6 |
 | 7 — Performance | 0 | 6 |
 | 8 — Teaching artifacts | 0 | 10 |
-| **Total** | **19** | **92** |
+| **Total** | **24** | **92** |
 
 ## CI
 
-[Run 1](https://github.com/yksi7417/csharp_ringbuffer/actions/runs/32278212505) — **both legs
-green**, `fast on x64` and `fast on arm64`, the latter on a real `ubuntu-24.04-arm` runner.
-Bootstrap works on both architectures.
+| Run | Result |
+|---|---|
+| [1](https://github.com/yksi7417/csharp_ringbuffer/actions/runs/32278212505) | green, both legs, ARM64 on a real `ubuntu-24.04-arm` runner |
+| [2](https://github.com/yksi7417/csharp_ringbuffer/actions/runs/32279590709) | **red, both legs, two different causes** — see TRAP-8 and TRAP-9 |
+| 3 | fix pushed in `7eb634e`; awaiting result |
+
+Run 2 is the important one. It went red **after a green local gate**, which is exactly what
+[one gate command](../knowledge/practices/one-gate-command.md) promises cannot happen — and
+the promise was never false, only narrower than its wording. The runners carry .NET SDK
+10.0.302; this container carries 8.0.130, and VSTest is removed in 10. Same script, same repo,
+opposite result. Now pinned by `global.json` + `actions/setup-dotnet`, with `bootstrap.sh`
+checking the SDK **major version** rather than mere presence.
 
 **This does not retire [R4](../knowledge/risks/risk-register.md).** The ARM64 leg existing and
 running is confirmed; that it *catches* a weak-memory bug is not, and cannot be until there is
@@ -63,6 +75,13 @@ observed going red:
 
 ## Found while building Phase 1
 
+- **A green local gate does not imply a green CI lane unless the toolchain is pinned.**
+  TRAP-8, and the most valuable lesson so far: a version that is not pinned is a variable, and
+  a variable in a guardrail is a hole.
+- **SBE "append-only" is per section, not per file.** A new field must go at the end of the
+  *field block*, a new group after the existing groups, and data stays last — the parser
+  rejects `field node specified after group or data node`. Growing the field block is exactly
+  what `blockLength` and `actingVersion` exist to absorb.
 - **A build succeeded having compiled none of its generated sources.** TRAP-7, and the most
   instructive failure so far — two independent faults each sufficient to produce a convincing
   green: MSBuild evaluates the `Compile` glob before `BeforeCompile` targets run, and the
@@ -75,9 +94,12 @@ observed going red:
   *unconditionally* — worse than a check that misses a case. Replaced with a
   hash / regenerate / compare in `codegen_fresh.sh`, verified failing on both a changed schema
   and a hand-edited `.g.cs`.
-- **`--` is illegal inside an XML comment**, and I hit it twice in `.csproj`/`.props` files
-  before scrubbing them all. Cheap to fix, confusing to diagnose: MSBuild reports it as
-  "project file could not be loaded".
+- **`--` is illegal inside an XML comment**, and I hit it three times — `.csproj`, `.props`,
+  and an SBE schema. Cheap to fix, expensive to diagnose, because no error names the cause.
+  Now caught by the `xml-wellformed` gate step (TRAP-10).
+- **The zero-allocation harness is not vacuous**, and that was checked: span overloads measure
+  exactly 0 bytes per iteration, while `GetSymbol()` measures greater than 0 in the same
+  harness. A check that cannot distinguish the two would pass either way.
 
 ## Found while building Phase 0
 

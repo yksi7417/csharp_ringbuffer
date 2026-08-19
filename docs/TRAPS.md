@@ -158,3 +158,17 @@ red builds. Two or three of those and every failure becomes "probably just CI".
 before accepting it (a truncated download fails later, somewhere else, and much more
 confusingly). CI additionally caches the jar keyed on `sbe-version.txt`, so a green run does
 not depend on someone else's quota.
+
+## TRAP-10 — `--` inside an XML comment, three times, each reported unhelpfully
+
+**What looked green:** nothing, but the diagnosis cost far more than the defect. `--` is
+illegal inside an XML comment, and I wrote it three times in one session: in a `.csproj`, a
+`.props`, and an SBE schema.
+
+**Why it matters:** none of the three errors names the cause.
+MSBuild says *"The project file could not be loaded"*; the SBE parser throws a
+`SAXParseException` with a line and column that point at the comment but not at the reason.
+Each looked like a structural problem with the file.
+
+**Guard:** `scripts/ci/checks/xml_wellformed.py` parses every tracked XML-family file and, when
+the message matches this case, says so explicitly. In the `fast` lane.

@@ -88,14 +88,20 @@ observed from a fresh session.
 | ✅ 1.4 | Codegen wired into the build | `dotnet build` regenerates before compile | ✅ 1.3 | M |
 | ✅ 1.5 | `codegen-clean` gate step | Uses `git status --porcelain` **including untracked** ([TRAP-2](../knowledge/practices/trap-log.md)) | ✅ 1.4 | S |
 | ✅ 1.6 | Generator test: generated code **compiles and round-trips** | Not "files appeared" — a generator that writes nothing exits 0 | ✅ 1.4 | M |
-| 1.7 | `schemas/fix-sbe-v2.xml` — appends a field and a group | v2 differs from v1 by addition only | ✅ 1.3 | S |
-| 1.8 | Schema-evolution test: v2 codec decodes v1 bytes | Absent fields return their null value via `actingVersion` | 1.7 | M |
-| 1.9 | Zero-allocation test harness | `GC.GetAllocatedBytesForCurrentThread()` delta asserted **exactly 0** | 0.3 | M |
-| 1.10 | Zero-alloc assertion over codec encode/decode | Span overloads allocate 0; documents that `string` overloads do not | 1.9 | M |
-| 1.11 | `banned-members` lint (`GetText()`, `GetSymbol()`, …) | Using a `string` overload in `src/` fails ([R5](../knowledge/risks/risk-register.md)) | 1.10 | M |
+| ✅ 1.7 | `schemas/fix-sbe-v2.xml` — appends a field and a group | v2 differs from v1 by addition only | ✅ 1.3 | S |
+| ✅ 1.8 | Schema-evolution test: v2 codec decodes v1 bytes | Absent fields return their null value via `actingVersion` | ✅ 1.7 | M |
+| ✅ 1.9 | Zero-allocation test harness | `GC.GetAllocatedBytesForCurrentThread()` delta asserted **exactly 0** | 0.3 | M |
+| ✅ 1.10 | Zero-alloc assertion over codec encode/decode | Span overloads allocate 0; documents that `string` overloads do not | ✅ 1.9 | M |
+| ✅ 1.11 | `banned-members` lint (`GetText()`, `GetSymbol()`, …) | Using a `string` overload in `src/` fails ([R5](../knowledge/risks/risk-register.md)) | ✅ 1.10 | M |
 
-**Phase 1 exit:** schemas generate codecs that round-trip nested groups with zero allocation,
-and the wire format is reproducible.
+**Phase 1 exit — met on 2026-08-19.** Both schemas generate; 9 tests pass covering
+round-trip, nested groups with uneven inner counts, byte-determinism, empty groups, schema
+evolution, and zero allocation. `gate.sh full` is green with 12 steps passing.
+
+Two gate steps were added that the plan did not anticipate, both because a check turned out to
+be unable to fail as specified: `xml-wellformed` (TRAP-10) and `banned-members` moved earlier
+than planned to guard the allocation result while it is fresh. The `codegen-clean` step is
+implemented as a content hash rather than `git status`, for the reason in TRAP-7.
 
 ---
 

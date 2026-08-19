@@ -30,9 +30,11 @@ FAST_STEPS=(
     exec-bits
     shellcheck
     okf-validate
+    xml-wellformed
     deferred-work
     vendored-sbe
     no-lock
+    banned-members
     build
     unit-tests
 )
@@ -80,6 +82,10 @@ step_shellcheck() {
     shellcheck -S warning $(find scripts .githooks -name '*.sh' -type f 2>/dev/null)
 }
 
+step_xml_wellformed() {
+    python3 scripts/ci/checks/xml_wellformed.py
+}
+
 step_okf_validate() {
     python3 scripts/ci/checks/okf_validate.py knowledge
 }
@@ -98,6 +104,10 @@ step_vendored_sbe_upstream() {
 
 step_no_lock() {
     scripts/ci/checks/no_lock.sh
+}
+
+step_banned_members() {
+    python3 scripts/ci/checks/banned_members.py
 }
 
 step_build() {
