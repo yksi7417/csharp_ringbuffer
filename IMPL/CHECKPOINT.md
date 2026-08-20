@@ -5,31 +5,30 @@ Where the implementation stands. Updated in the same commit as the task it recor
 ## Position
 
 **Phases 0, 1 and 2 complete. [R3 is retired.](../knowledge/risks/risk-register.md)
-Phase 3 — ATDD scaffolding. Task 3.1 is next.**
+Phase 3 in progress — 4 of 11 done. Task 3.5 is next.**
 
-`gate.sh full` is green with 12 steps passing; only `conformance` is N/A, waiting on the
-corpus Phase 3 builds. 40 tests pass: 9 codec, 31 ring algebra.
+The journal format, the `IRingBuffer` contract, the reference-queue oracle and the
+deterministic clock/id seams are all in place, with 19 new tests. 59 tests pass overall.
 
 ## Next unblocked task
 
-**3.1 — journal reader/writer**, length-prefixed SBE frames. Needs 1.3 (done).
+**3.5 — the `replay` CLI** (`--input`, `--output`, `--seed`). Needs 3.1, 3.3, 3.4, all done.
+Then 3.6–3.7 (the differ, and schema-resolved field naming), 3.8 (Reqnroll), 3.9–3.11 (the
+fixture builder, first corpus cases, and the conformance gate step).
 
-Phase 3 writes the acceptance scaffolding **before** the rings it exercises. The
-bootstrapping problem — fixtures are produced by the harness that needs the ring under test —
-is resolved by building the trivially-correct `List<byte[]>` reference queue first (3.3).
-
-### Regression evidence — `0392dca`, 2026-08-20T02:00:20Z (working tree dirty)
+### Regression evidence — `88fa00d`, 2026-08-20T02:09:17Z (working tree dirty)
 
 | Suite | Result |
 |---|---|
 | `RingBuffer.Codecs.Tests.dll` | 9 passed, 0 failed |
-| `RingBuffer.Core.Tests.dll` | 31 passed, 0 failed |
-| **Total** | **40 passed, 0 failed** |
-| `gate.sh full` | full GREEN -- 12 passed, 1 not yet applicable (20s) |
+| `RingBuffer.Core.Tests.dll` | 50 passed, 0 failed |
+| **Total** | **59 passed, 0 failed** |
+| `gate.sh full` | full GREEN -- 12 passed, 1 not yet applicable (24s) |
 
 Produced by `scripts/ci/evidence.sh`, which exits non-zero if anything is red — it cannot be
-used to record a green checkpoint over a broken tree. Verified failing: breaking one assertion
-in `PositionTests` turned it red, named the test, and returned exit 1.
+used to record a green checkpoint over a broken tree. It has now caught one for real: at this
+checkpoint the tests were all green while `banned-members` was red, which a test-only check
+would have missed.
 
 **Every checkpoint from here carries this block.** See
 [the implementation loop](../knowledge/practices/implementation-loop.md).
@@ -41,13 +40,13 @@ in `PositionTests` turned it red, named the test, and returned exit 1.
 | 0 — Toolchain and gate | **13** | 13 |
 | 1 — Schemas and codecs | **11** | 11 |
 | 2 — Ring algebra | **9** | 9 |
-| 3 — ATDD scaffolding | 0 | 11 |
+| 3 — ATDD scaffolding | **4** | 11 |
 | 4 — SPSC ring | 0 | 15 |
 | 5 — MPSC, concurrency, ARM64 | 0 | 11 |
 | 6 — Triangulation and corpus | 0 | 6 |
 | 7 — Performance | 0 | 6 |
 | 8 — Teaching artifacts | 0 | 10 |
-| **Total** | **33** | **92** |
+| **Total** | **37** | **92** |
 
 ## CI
 
@@ -87,6 +86,21 @@ observed going red:
 | `no-lock` | a `lock` statement in `src/` | caught, exit 1 |
 | `deferred-work` | orphan `DEFERRED:` marker; entry missing **Why** | both caught |
 | `dispatch` (TRAP-3) | a lane listing a step with no `step_` function | caught, exit 1 |
+
+## Found while building Phase 3
+
+- **The evidence script caught a real regression on its first working checkpoint.** All 59
+  tests were green while `banned-members` was red — exactly the gap between "my change is
+  fine" and "the tree is whole" that the separate script exists to close.
+- **The compiler enforced the `ref struct` guarantee on me.** `Assert.Throws(() => claim.Commit(5))`
+  does not compile: CS8175, a `ref` local cannot be captured by a lambda. So a `Claim`
+  genuinely cannot outlive its stack frame, and cannot become a pointer into memory the
+  consumer has already reclaimed. The test now uses try/catch and says why.
+- **The reference queue's limits are written down, not assumed.** It is an oracle for
+  *payload preservation* only. It has no wrap, no padding and no capacity bound, so it can
+  never disagree with a real ring about those — those are pinned by the Phase 2 algebra tests
+  instead. Claiming more for it would be the most tempting way to get false confidence out of
+  triangulation.
 
 ## Found while building Phase 2
 

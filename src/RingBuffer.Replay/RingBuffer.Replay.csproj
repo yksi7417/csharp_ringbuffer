@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RingBuffer.Replay</AssemblyName>
+    <RootNamespace>RingBuffer.Replay</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../RingBuffer.Core/RingBuffer.Core.csproj" />
+  </ItemGroup>
+</Project>
