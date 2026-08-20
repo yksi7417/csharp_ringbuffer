@@ -18,6 +18,22 @@ Phase 3 writes the acceptance scaffolding **before** the rings it exercises. The
 bootstrapping problem — fixtures are produced by the harness that needs the ring under test —
 is resolved by building the trivially-correct `List<byte[]>` reference queue first (3.3).
 
+### Regression evidence — `0392dca`, 2026-08-20T02:00:20Z (working tree dirty)
+
+| Suite | Result |
+|---|---|
+| `RingBuffer.Codecs.Tests.dll` | 9 passed, 0 failed |
+| `RingBuffer.Core.Tests.dll` | 31 passed, 0 failed |
+| **Total** | **40 passed, 0 failed** |
+| `gate.sh full` | full GREEN -- 12 passed, 1 not yet applicable (20s) |
+
+Produced by `scripts/ci/evidence.sh`, which exits non-zero if anything is red — it cannot be
+used to record a green checkpoint over a broken tree. Verified failing: breaking one assertion
+in `PositionTests` turned it red, named the test, and returned exit 1.
+
+**Every checkpoint from here carries this block.** See
+[the implementation loop](../knowledge/practices/implementation-loop.md).
+
 ## Progress
 
 | Phase | Done | Total |

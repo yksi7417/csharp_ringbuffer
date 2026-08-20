@@ -36,6 +36,13 @@ A CI-only check cannot be run locally, so it is discovered at push time; a local
 does not block anyone. Both drift. A single script that both call is the only arrangement
 where "it passed locally" and "it passed in CI" mean the same thing.
 
+# Evidence at a checkpoint
+
+`gate.sh` answers "is this push safe". `scripts/ci/evidence.sh` answers the different
+question "is the tree still whole", by running every suite and reporting the counts.
+Recording a checkpoint requires the second. See
+[the implementation loop](implementation-loop.md).
+
 # A lane listing a step with no dispatch case must FAIL
 
 Not warn, not skip. This is [TRAP-3](trap-log.md) from the reference project — a gate step

@@ -28,9 +28,30 @@ checkbox moved.
 3. **Write the failing test first.** Every task's *Done when* is phrased so it can be a test.
 4. Implement until it passes.
 5. `scripts/ci/gate.sh fast`.
-6. Commit the code, the plan tick and the checkpoint **together**.
+6. **Produce regression evidence before recording the checkpoint:**
+
+   ```bash
+   scripts/ci/evidence.sh --markdown
+   ```
+
+   It builds, runs **every existing test suite**, runs `gate.sh full`, and exits
+   non-zero if anything is red — so it cannot be used to record a green checkpoint
+   over a broken tree. Paste its output into
+   [`CHECKPOINT.md`](/../IMPL/CHECKPOINT.md).
+7. Commit the code, the plan tick and the checkpoint **together**.
 7. If the task changed something this bundle asserts, update the bundle in the same commit —
    see [bundle maintenance](knowledge-bundle-maintenance.md).
+
+# Why evidence, and not just "the gate was green"
+
+A checkpoint is a claim about the state of the whole tree, not about the task just
+finished. Claiming it without re-running the suites is how a green checkpoint comes
+to sit on top of a regression introduced two tasks ago — every individual change
+looked fine in isolation.
+
+The evidence block records **which suites ran and how many assertions passed**, so a
+later reader can tell the difference between "40 tests passed" and "the 3 tests I
+happened to run passed". A count that silently drops is itself a regression.
 
 # Commit convention
 
