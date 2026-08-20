@@ -146,16 +146,27 @@ Written **before** the rings, per [ATDD](../knowledge/testing/test-pyramid.md).
 | ✅ 3.2 | `IRingBuffer` + `Claim` ref struct — signatures only | Compiles; `Claim` **cannot escape to the heap** (verified: a `ref struct` is required, not stylistic) | 0.3 | M |
 | ✅ 3.3 | **`ReferenceQueue` — the `List<byte[]>` oracle** | Implements `IRingBuffer`; obviously correct by inspection | ✅ 3.2 | M |
 | ✅ 3.4 | `IClock` + seeded id source | No `DateTime.Now`, no `Guid.NewGuid()` anywhere on the replay path | 0.3 | S |
-| 3.5 | `replay` CLI — `--input`, `--output`, `--seed` | Pure function; no network, no clock, no other filesystem access ([deterministic replay](../knowledge/concepts/deterministic-replay.md)) | 3.1, 3.3, 3.4 | L |
-| 3.6 | Byte-exact differ | Reports first differing offset, expected vs actual hex, with context | ✅ 3.1 | M |
-| 3.7 | **Schema-resolved field naming in the differ** | Names the *field* at the offset, not just the offset. A raw offset is useless at 3am | 3.6 | L |
-| 3.8 | Reqnroll wiring + first scenario | Scenario runs and **fails** for the right reason | 3.5 | M |
-| 3.9 | Corpus fixture builder | Produces `input.sbe` from a declarative case description | ✅ 3.1 | M |
-| 3.10 | First 3 corpus cases via the reference queue | `single`, `multiple`, `nested-groups` green against `ReferenceQueue` | 3.9, 3.5 | M |
-| 3.11 | `conformance` gate step (`full` lane) | Runs every case against every available implementation | 3.10 | M |
+| ✅ 3.5 | `replay` CLI — `--input`, `--output`, `--seed` | Pure function; no network, no clock, no other filesystem access ([deterministic replay](../knowledge/concepts/deterministic-replay.md)) | 3.1, 3.3, 3.4 | L |
+| ✅ 3.6 | Byte-exact differ | Reports first differing offset, expected vs actual hex, with context | ✅ 3.1 | M |
+| ✅ 3.7 | **Schema-resolved field naming in the differ** | Names the *field* at the offset, not just the offset. A raw offset is useless at 3am | ✅ 3.6 | L |
+| ✅ 3.8 | Reqnroll wiring + first scenario | Scenario runs and **fails** for the right reason | ✅ 3.5 | M |
+| ✅ 3.9 | Corpus fixture builder | Produces `input.sbe` from a declarative case description | ✅ 3.1 | M |
+| ✅ 3.10 | First 3 corpus cases via the reference queue | `single`, `multiple`, `nested-groups` green against `ReferenceQueue` | 3.9, 3.5 | M |
+| ✅ 3.11 | `conformance` gate step (`full` lane) | Runs every case against every available implementation | ✅ 3.10 | M |
 
-**Phase 3 exit:** a failing acceptance suite exists, with fixtures, before either real ring is
-written. That is what makes it a guardrail rather than a regression net.
+**Phase 3 exit — met on 2026-08-19.** The acceptance suite, the corpus and the harness all
+exist and run **before either real ring is written**. `gate.sh full` is green with **14 steps
+and zero N/A** — the first run where every step has a subject.
+
+5 corpus cases pass byte-for-byte against the reference queue; 8 Gherkin scenarios pass. The
+differ was verified against a corrupted fixture and named the field
+(`NewOrderSingle.orderQty (uint32) at block offset 30`) rather than only the offset.
+
+Two corrections landed in the phase. The replay harness was moved from `src/` to `tests/`,
+where the plan always said it belonged — the `banned-members` lint exposed it by flagging
+allocations in what is test apparatus. And `Reqnroll.xUnit` pins xUnit v2
+([F7](../knowledge/findings/f7-reqnroll-pins-xunit-v2.md)), so the acceptance project runs a
+different xUnit major than the other suites.
 
 ---
 

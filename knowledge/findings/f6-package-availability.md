@@ -23,7 +23,9 @@ Queried against `api.nuget.org` on 2026-08-19:
 
 # Consequence
 
-No tooling gaps. The one to watch is BenchmarkDotNet, which is on a **preview** version —
+No tooling gaps — but availability is not compatibility. This finding tacitly assumed
+`xunit.v3` and `Reqnroll.xUnit` could be used together, and they cannot be, in one project.
+See [F7](f7-reqnroll-pins-xunit-v2.md). The one to watch is BenchmarkDotNet, which is on a **preview** version —
 acceptable for a benchmark project that does not ship, but it should not be load-bearing for
 a gate that blocks merges until it goes stable.
 

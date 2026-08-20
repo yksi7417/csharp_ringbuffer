@@ -12,12 +12,17 @@ namespace RingBuffer.Core.Tests;
 /// </summary>
 public sealed class ReferenceQueueTests
 {
+    // Typed as IRingBuffer deliberately, against CA1859's advice: the point is that
+    // the contract works through the interface, because the same suite will run
+    // against SPSC and MPSC in Phases 4 and 5.
+#pragma warning disable CA1859
     private static List<(int Type, byte[] Payload)> Drain(IRingBuffer ring, int limit = int.MaxValue)
     {
         var got = new List<(int, byte[])>();
         ring.Read((type, payload) => got.Add((type, payload.ToArray())), limit);
         return got;
     }
+#pragma warning restore CA1859
 
     [Fact]
     public void A_committed_message_comes_back_byte_identical()

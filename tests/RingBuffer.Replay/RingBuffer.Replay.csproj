@@ -2,8 +2,10 @@
   <PropertyGroup>
     <AssemblyName>RingBuffer.Replay</AssemblyName>
     <RootNamespace>RingBuffer.Replay</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../RingBuffer.Core/RingBuffer.Core.csproj" />
+    <ProjectReference Include="../../src/RingBuffer.Core/RingBuffer.Core.csproj" />
   </ItemGroup>
 </Project>

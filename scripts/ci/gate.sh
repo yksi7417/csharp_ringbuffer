@@ -42,6 +42,7 @@ FAST_STEPS=(
 FULL_EXTRA_STEPS=(
     vendored-sbe-upstream
     codegen-clean
+    corpus-fresh
     conformance
 )
 
@@ -128,7 +129,16 @@ step_codegen_clean() {
 step_conformance() {
     [ -d tests/conformance/corpus ] && [ -n "$(ls -A tests/conformance/corpus 2>/dev/null)" ] \
         || { echo "no corpus yet"; return $NOT_APPLICABLE; }
-    conformance/harness/run.sh
+    tests/conformance/harness/run.sh
+}
+
+step_corpus_fresh() {
+    [ -d tests/conformance/corpus ] || { echo "no corpus yet"; return $NOT_APPLICABLE; }
+    # Asserts the committed fixtures still match their declarations in
+    # tools/CorpusBuilder/Cases.cs. Catches a fixture edited by hand, and a case
+    # declaration changed without rebuilding.
+    dotnet run --project tools/CorpusBuilder -v q -- \
+        --out tests/conformance/corpus --check
 }
 
 step_stress() {

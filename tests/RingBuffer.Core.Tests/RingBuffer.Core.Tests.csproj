@@ -11,6 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/RingBuffer.Core/RingBuffer.Core.csproj" />
-    <ProjectReference Include="../../src/RingBuffer.Replay/RingBuffer.Replay.csproj" />
+    <ProjectReference Include="../RingBuffer.Replay/RingBuffer.Replay.csproj" />
   </ItemGroup>
 </Project>

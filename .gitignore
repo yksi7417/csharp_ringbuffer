@@ -21,3 +21,7 @@ BenchmarkDotNet.Artifacts/
 .idea/
 *.user
 .codegen-stamp
+
+# Reqnroll generates these from .feature files on build. Same rule as the SBE
+# codecs: generated code is not committed.
+*.feature.cs

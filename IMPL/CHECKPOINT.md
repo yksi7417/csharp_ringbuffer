@@ -4,31 +4,36 @@ Where the implementation stands. Updated in the same commit as the task it recor
 
 ## Position
 
-**Phases 0, 1 and 2 complete. [R3 is retired.](../knowledge/risks/risk-register.md)
-Phase 3 in progress — 4 of 11 done. Task 3.5 is next.**
+**Phases 0–3 complete. Phase 4 — the SPSC ring. Task 4.1 is next.**
 
-The journal format, the `IRingBuffer` contract, the reference-queue oracle and the
-deterministic clock/id seams are all in place, with 19 new tests. 59 tests pass overall.
+`gate.sh full` is green with **14 steps and zero N/A** — the first run in which every step has
+a subject. 76 tests pass across three suites, plus 5 conformance cases byte-for-byte.
+
+The acceptance suite exists **before the rings it will exercise**, which is the whole point of
+the ATDD ordering: a test written after the implementation encodes what the code does, not
+what it should do.
 
 ## Next unblocked task
 
-**3.5 — the `replay` CLI** (`--input`, `--output`, `--seed`). Needs 3.1, 3.3, 3.4, all done.
-Then 3.6–3.7 (the differ, and schema-resolved field naming), 3.8 (Reqnroll), 3.9–3.11 (the
-fixture builder, first corpus cases, and the conformance gate step).
+**4.1 — slab allocation** (`NativeMemory.AlignedAlloc`, 4096-aligned, power-of-two capacity).
 
-### Regression evidence — `88fa00d`, 2026-08-20T02:09:17Z (working tree dirty)
+Phase 4 builds the real SPSC ring against the algebra Phase 2 proved and the corpus Phase 3
+committed. When it lands, `--ring spsc` joins the harness and the same 5 cases run against
+it unchanged.
+
+### Regression evidence — `cb5de8d`, 2026-08-20T17:42:04Z (working tree dirty)
 
 | Suite | Result |
 |---|---|
+| `RingBuffer.Acceptance.dll` | 8 passed, 0 failed |
 | `RingBuffer.Codecs.Tests.dll` | 9 passed, 0 failed |
-| `RingBuffer.Core.Tests.dll` | 50 passed, 0 failed |
-| **Total** | **59 passed, 0 failed** |
-| `gate.sh full` | full GREEN -- 12 passed, 1 not yet applicable (24s) |
+| `RingBuffer.Core.Tests.dll` | 59 passed, 0 failed |
+| **Total** | **76 passed, 0 failed** |
+| `gate.sh full` | full GREEN -- 14 passed, 0 not yet applicable (25s) |
 
 Produced by `scripts/ci/evidence.sh`, which exits non-zero if anything is red — it cannot be
-used to record a green checkpoint over a broken tree. It has now caught one for real: at this
-checkpoint the tests were all green while `banned-members` was red, which a test-only check
-would have missed.
+used to record a green checkpoint over a broken tree. It has caught two real failures so far,
+both times with every test green and a gate step red.
 
 **Every checkpoint from here carries this block.** See
 [the implementation loop](../knowledge/practices/implementation-loop.md).
@@ -40,13 +45,13 @@ would have missed.
 | 0 — Toolchain and gate | **13** | 13 |
 | 1 — Schemas and codecs | **11** | 11 |
 | 2 — Ring algebra | **9** | 9 |
-| 3 — ATDD scaffolding | **4** | 11 |
+| 3 — ATDD scaffolding | **11** | 11 |
 | 4 — SPSC ring | 0 | 15 |
 | 5 — MPSC, concurrency, ARM64 | 0 | 11 |
 | 6 — Triangulation and corpus | 0 | 6 |
 | 7 — Performance | 0 | 6 |
 | 8 — Teaching artifacts | 0 | 10 |
-| **Total** | **37** | **92** |
+| **Total** | **44** | **92** |
 
 ## CI
 
@@ -89,6 +94,20 @@ observed going red:
 
 ## Found while building Phase 3
 
+- **The lint found a layout error, not just an allocation.** `banned-members` flagged
+  allocations in `RingBuffer.Replay` — which is test apparatus, and which
+  [the plan](PLAN.md) always placed under `tests/`. I had put it in `src/` by reflex. Moving
+  it made the lint pass with no exemption at all, which is the right shape: the rule did not
+  need loosening, the layout needed correcting.
+- **Availability is not compatibility.** [F6](../knowledge/findings/f6-package-availability.md)
+  listed `xunit.v3` and `Reqnroll.xUnit` as both available, tacitly assuming they compose.
+  They do not — Reqnroll pins xUnit v2, and the failure surfaces as
+  `CS0103: The name 'Assert' does not exist`, which points at the symbol rather than the
+  version mismatch underneath. Recorded as [F7](../knowledge/findings/f7-reqnroll-pins-xunit-v2.md).
+- **The differ was verified against a corrupted fixture**, not just a matching one. Flipping
+  one byte produced `NewOrderSingle.orderQty (uint32) at block offset 30, byte 0 of 4` with
+  the differing byte bracketed in a hex dump of both sides. That is the difference between a
+  corpus people use and a corpus people mute.
 - **The evidence script caught a real regression on its first working checkpoint.** All 59
   tests were green while `banned-members` was red — exactly the gap between "my change is
   fine" and "the tree is whole" that the separate script exists to close.

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RingBuffer.Acceptance</AssemblyName>
+    <RootNamespace>RingBuffer.Acceptance</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Reqnroll.xUnit 3.3.4 pins xUnit v2 (2.8.1), so this project cannot use the
+         xunit.v3 stack the other suites run on. Both versions coexist in the
+         solution; they simply cannot coexist in one project. See F7. -->
+    <PackageReference Include="Reqnroll.xUnit" Version="3.3.4" />
+    <PackageReference Include="xunit.assert" Version="2.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/RingBuffer.Core/RingBuffer.Core.csproj" />
+    <ProjectReference Include="../../src/RingBuffer.Codecs/RingBuffer.Codecs.csproj" />
+    <ProjectReference Include="../../src/RingBuffer.Sbe/RingBuffer.Sbe.csproj" />
+    <ProjectReference Include="../RingBuffer.Replay/RingBuffer.Replay.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>CorpusBuilder</AssemblyName>
+    <RootNamespace>RingBuffer.CorpusBuilder</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/RingBuffer.Codecs/RingBuffer.Codecs.csproj" />
+    <ProjectReference Include="../../tests/RingBuffer.Replay/RingBuffer.Replay.csproj" />
+    <ProjectReference Include="../../src/RingBuffer.Sbe/RingBuffer.Sbe.csproj" />
+  </ItemGroup>
+</Project>

@@ -17,3 +17,4 @@ strangely".
 
 * [F1: dotnet-install.sh is egress-blocked](f1-dotnet-install-egress-blocked.md) - Bootstrap must use apt, or web agent sessions cannot build.
 * [F6: All required NuGet packages are available](f6-package-availability.md) - xUnit v3, Reqnroll, Coyote, FsCheck, BenchmarkDotNet, Verify.
+* [F7: Reqnroll pins xUnit v2](f7-reqnroll-pins-xunit-v2.md) - The acceptance project cannot use xunit.v3. Both versions coexist in the solution, but not in one project.

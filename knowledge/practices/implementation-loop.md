@@ -39,8 +39,25 @@ checkbox moved.
    over a broken tree. Paste its output into
    [`CHECKPOINT.md`](/../IMPL/CHECKPOINT.md).
 7. Commit the code, the plan tick and the checkpoint **together**.
+8. **Push to `main` at a phase boundary**, not mid-phase. Commits accumulate locally
+   through a phase; the push happens when the phase's exit criterion is met and the
+   evidence block is green.
 7. If the task changed something this bundle asserts, update the bundle in the same commit —
    see [bundle maintenance](knowledge-bundle-maintenance.md).
+
+# One check-in per phase
+
+A phase is the unit of review. Its exit criterion is a statement someone can check
+("both rings pass the same corpus", "R3 is retired"), and a push carrying half a
+phase asks a reviewer to evaluate an argument that is not finished yet.
+
+Commit as often as the work suggests — one behaviour per commit is still the rule,
+and it is what makes the TDD history checkable (S6). But **push when the phase
+lands**, with the evidence block covering the whole phase rather than a slice of it.
+
+The exception is a fix to something already on `main` — a red gate, a broken CI lane.
+That goes immediately, because leaving `main` red to preserve a cadence is the wrong
+trade.
 
 # Why evidence, and not just "the gate was green"
 
